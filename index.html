@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pausa Visual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: tablero de herramientas en una columna de 1100 px; cada herramienta abre una pausa a pantalla completa con luz tenue.
+   Tema único y oscuro cálido por decisión de diseño: la app se usa cuando los ojos ya están cansados. */
+:root{
+  --bg:#1c1922; --bg-2:#221e29; --surface:#2a2533; --surface-2:#332d3e; --line:#3d3549; --ink:#f3eadf; --ink-2:#d2c7b9; --muted:#a39888;
+  --amber:#f2b56b; --sage:#93c7a8; --lav:#b9a7e3; --rose:#eba3a0; --sky:#92bde6;
+  --btn-ink:#2a1b0b;
+  --f-display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 1rem/1.6 var(--f-body)}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:clamp(16px,4vw,32px)}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;margin:0;text-wrap:balance;letter-spacing:-.01em}
+p{margin:0}
+
+/* Cabecera */
+header.top{padding-top:calc(14px + env(safe-area-inset-top,0px));padding-bottom:14px;border-bottom:1px solid var(--line);background:var(--bg-2)}
+.top-in{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px}
+.brand svg{color:var(--amber);flex:none}
+.brand b{font:700 1.35rem/1 var(--f-display)}
+.brand span{display:block;font-size:.82rem;color:var(--muted);margin-top:3px}
+.count{font-size:.88rem;color:var(--ink-2);display:flex;gap:8px;align-items:center}
+.count b{font:600 1.1rem/1 var(--f-display);color:var(--amber)}
+
+/* Inicio */
+main{padding-block:clamp(28px,5vw,48px) 56px;display:grid;gap:clamp(32px,5vw,52px)}
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:clamp(20px,4vw,40px);align-items:center}
+@media (max-width:860px){.hero{grid-template-columns:minmax(0,1fr)}}
+.hero h1{font-size:clamp(2rem,4.6vw,3.2rem);line-height:1.05;margin-bottom:14px}
+.hero h1 em{font-style:normal;color:var(--amber)}
+.lead{font-size:1.1rem;color:var(--ink-2);max-width:56ch}
+.check{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;display:grid;gap:14px}
+.check h2{font-size:1.2rem}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--bg-2);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:700;font-size:.92rem;color:var(--ink-2)}
+.chip:hover{border-color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--amber);color:var(--btn-ink);border-color:var(--amber)}
+.suggest{font-size:.95rem;color:var(--ink-2);min-height:1.6em}
+.suggest b{color:var(--ink)}
+
+.sec-title{display:flex;justify-content:space-between;align-items:end;gap:10px 20px;flex-wrap:wrap;margin-bottom:16px}
+.sec-title h2{font-size:clamp(1.4rem,2.6vw,1.8rem)}
+.sec-title p{color:var(--muted);font-size:.95rem;max-width:52ch}
+.tools,.math{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px}
+.tools>:nth-child(-n+2),.math>:nth-child(-n+2){grid-column:span 3}
+.tools>:nth-child(n+3),.math>:nth-child(n+3){grid-column:span 2}
+@media (max-width:900px){.tools,.math{grid-template-columns:repeat(2,minmax(0,1fr))}.tools>*,.math>*{grid-column:span 1!important}.tools>:last-child,.math>:last-child{grid-column:span 2!important}}
+@media (max-width:600px){.tools,.math{grid-template-columns:minmax(0,1fr)}.tools>:last-child,.math>:last-child{grid-column:span 1!important}}
+.tool{--c:var(--amber);position:relative;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;display:grid;gap:10px;align-content:start;transition:border-color .2s, transform .2s}
+.tool:hover{border-color:color-mix(in srgb,var(--c) 55%,var(--line))}
+.tool.rec{border-color:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 30%,transparent)}
+.tool .ico{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 18%,transparent);color:var(--c)}
+.tool h3{font-size:1.25rem}
+.tool .meta{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:.82rem;color:var(--muted);font-weight:700}
+.tool .meta span{white-space:nowrap}
+.tool p{font-size:.94rem;color:var(--ink-2)}
+.tool .go{justify-self:start;margin-top:4px}
+.tool .badge{position:absolute;top:16px;right:16px;font-size:.75rem;font-weight:800;color:var(--btn-ink);background:var(--c);border-radius:999px;padding:3px 10px}
+.btn{border:0;border-radius:12px;padding:11px 18px;font-weight:800;cursor:pointer;background:var(--amber);color:var(--btn-ink);display:inline-flex;gap:8px;align-items:center}
+.btn:hover{filter:brightness(1.07)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--surface-2);filter:none}
+.btn.tint{background:var(--c);color:var(--btn-ink)}
+
+.remind{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px 20px;align-items:center}
+@media (max-width:720px){.remind{grid-template-columns:minmax(0,1fr)}}
+.remind .clock{font:600 2.4rem/1 var(--f-display);color:var(--amber);font-variant-numeric:tabular-nums;min-width:5ch}
+.remind .clock.off{color:var(--muted)}
+.remind h3{font-size:1.15rem;margin-bottom:4px}
+.remind p{font-size:.92rem;color:var(--ink-2)}
+.remind .ctrl{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+select{background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+
+.mcard{--c:var(--amber);background:var(--bg-2);border:1px solid var(--line);border-left:0;border-radius:14px;padding:16px 18px;display:grid;gap:8px;align-content:start;position:relative;overflow:hidden}
+.mcard::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--c)}
+.mcard .k{font-size:.75rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--c)}
+.mcard h3{font-size:1.05rem}
+.mcard p{font-size:.9rem;color:var(--ink-2)}
+.mcard .fx{overflow-x:auto;color:var(--ink)}
+footer{border-top:1px solid var(--line);padding-block:20px calc(20px + env(safe-area-inset-bottom,0px));color:var(--muted);font-size:.85rem}
+footer .wrap{display:flex;justify-content:space-between;gap:8px 20px;flex-wrap:wrap}
+
+/* Pausa a pantalla completa */
+.pause{position:fixed;inset:0;z-index:100;background:#141118;display:grid;grid-template-rows:auto 1fr auto}
+.pbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:calc(12px + env(safe-area-inset-top,0px)) 18px 12px;position:relative;z-index:2}
+.pbar .name{font:600 1.15rem/1.2 var(--f-display);display:flex;align-items:center;gap:10px}
+.pbar .dot{width:10px;height:10px;border-radius:50%;background:var(--c,var(--amber))}
+.pbar .right{display:flex;gap:8px;align-items:center}
+.ptime{font:600 1.05rem/1 var(--f-display);color:var(--ink-2);font-variant-numeric:tabular-nums;min-width:4ch;text-align:right}
+.iconbtn{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:rgba(42,37,51,.7);display:grid;place-items:center;cursor:pointer;color:var(--ink)}
+.iconbtn[aria-pressed="false"]{color:var(--muted)}
+.stage{position:relative;min-height:0}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.pfoot{padding:12px 18px calc(16px + env(safe-area-inset-bottom,0px));text-align:center;position:relative;z-index:2;display:grid;gap:10px;justify-items:center}
+.instr{font:600 clamp(1.05rem,2.4vw,1.45rem)/1.35 var(--f-display);max-width:40ch;color:var(--ink);min-height:2.7em}
+.pcontrols{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center;font-size:.9rem;color:var(--ink-2)}
+.pcontrols label{display:flex;gap:8px;align-items:center}
+input[type=range]{accent-color:var(--amber);width:150px}
+.card-over{position:absolute;inset:0;display:grid;place-items:center;padding:16px;z-index:3}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:24px;max-width:480px;width:100%;display:grid;gap:14px;box-shadow:0 20px 50px rgba(0,0,0,.4)}
+.pcard h2{font-size:1.5rem}
+.pcard ol{margin:0;padding-left:20px;display:grid;gap:6px;color:var(--ink-2)}
+.pcard p{color:var(--ink-2)}
+.pcard .btns{display:flex;gap:10px;flex-wrap:wrap}
+.drawer{position:absolute;right:16px;top:70px;z-index:4;width:min(420px,calc(100vw - 32px));max-height:calc(100% - 140px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:10px;box-shadow:0 20px 50px rgba(0,0,0,.45)}
+.drawer h3{font-size:1.1rem;color:var(--c,var(--amber))}
+.drawer p{font-size:.92rem;color:var(--ink-2)}
+.drawer .fx{overflow-x:auto;background:var(--bg-2);border-radius:10px;padding:8px 10px}
+.drawer .live{font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+.banner{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:90;background:var(--surface-2);border:1px solid var(--amber);border-radius:16px;padding:14px 16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 32px);box-shadow:0 14px 40px rgba(0,0,0,.45)}
+.banner p{font-weight:700}
+mjx-container{color:inherit}
+@media (prefers-reduced-motion:reduce){.tool{transition:none}}
+</style>
+<script>
+window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'},options:{enableMenu:false}};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" defer></script>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-in">
+    <div class="brand">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <path d="M4 21c4-6 9.5-9 16-9s12 3 16 9" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M8 24c3 2.5 7 4 12 4s9-1.5 12-4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="1 5"/>
+        <path d="M27 6a5 5 0 1 0 5 6.5A4 4 0 0 1 27 6Z" fill="currentColor"/>
+      </svg>
+      <div><b>Pausa Visual</b><span>Herramientas para relajar la vista</span></div>
+    </div>
+    <div class="count" aria-live="polite">Pausas de hoy <b id="today">0</b></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero" aria-labelledby="h1">
+    <div>
+      <h1 id="h1">Tus ojos también necesitan <em>pausas</em></h1>
+      <p class="lead">Cinco herramientas cortas para descansar la vista entre clases, lecturas o jornadas frente al computador. Elige una según cómo te sientas o activa el recordatorio para no olvidar tus pausas.</p>
+    </div>
+    <div class="check">
+      <h2>¿Cómo sientes los ojos ahora?</h2>
+      <div class="chips" role="group" aria-label="Síntoma principal">
+        <button class="chip" type="button" data-sym="parpadeo" aria-pressed="false">Secos</button>
+        <button class="chip" type="button" data-sym="palmeo" aria-pressed="false">Cansados</button>
+        <button class="chip" type="button" data-sym="enfoque" aria-pressed="false">Me cuesta enfocar</button>
+        <button class="chip" type="button" data-sym="seguir" aria-pressed="false">Tensos o pesados</button>
+        <button class="chip" type="button" data-sym="lejos" aria-pressed="false">Estoy bien</button>
+      </div>
+      <p class="suggest" id="suggest" aria-live="polite">Toca una opción y te sugerimos una herramienta.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-tools">
+    <div class="sec-title"><h2 id="h-tools">Herramientas</h2><p>Cada pausa dura menos de un minuto. Puedes cerrarla cuando quieras con la tecla Esc.</p></div>
+    <div class="tools" id="tools"></div>
+  </section>
+
+  <section class="remind" aria-labelledby="h-rem">
+    <div class="clock off" id="clock" aria-live="off">--:--</div>
+    <div>
+      <h3 id="h-rem">Recordatorio de pausas</h3>
+      <p>Cuando se cumpla el tiempo, sonará una campana y te propondremos una pausa 20-20-20. Funciona mientras esta página esté abierta.</p>
+    </div>
+    <div class="ctrl">
+      <select id="rem-min" aria-label="Intervalo del recordatorio"><option value="20" selected>Cada 20 min</option><option value="30">Cada 30 min</option><option value="45">Cada 45 min</option><option value="60">Cada 60 min</option></select>
+      <button class="btn" type="button" id="rem-btn">Activar</button>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-math">
+    <div class="sec-title"><h2 id="h-math">La matemática del kit</h2><p>Cada herramienta está diseñada con un concepto de Cálculo Integral. Dentro de cada pausa, el botón \(\int\) muestra los cálculos en vivo.</p></div>
+    <div class="math" id="math-cards"></div>
+  </section>
+</main>
+
+<footer><div class="wrap"><span>Proyecto de aula · Cálculo Integral</span><span>Herramienta educativa: no reemplaza la valoración de un profesional de la salud visual.</span></div></footer>
+
+<!-- Pausa -->
+<div class="pause" id="pause" hidden role="dialog" aria-modal="true" aria-labelledby="p-name">
+  <div class="pbar">
+    <div class="name"><span class="dot"></span><span id="p-name">Pausa</span></div>
+    <div class="right">
+      <span class="ptime" id="p-time" aria-live="off"></span>
+      <button class="iconbtn" type="button" id="p-sound" aria-pressed="true" aria-label="Sonido" title="Sonido">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path id="snd-wave" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg>
+      </button>
+      <button class="iconbtn" type="button" id="p-math" aria-pressed="false" aria-label="Matemática detrás" title="Matemática detrás"><span style="font:700 1.2rem/1 serif">∫</span></button>
+      <button class="iconbtn" type="button" id="p-close" aria-label="Cerrar pausa" title="Cerrar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="stage" id="p-stage">
+    <canvas id="p-canvas" aria-hidden="true"></canvas>
+    <div class="card-over" id="p-intro"><div class="pcard" id="p-intro-card"></div></div>
+    <div class="card-over" id="p-end" hidden><div class="pcard" id="p-end-card"></div></div>
+    <aside class="drawer" id="p-drawer" hidden aria-label="Matemática detrás"></aside>
+  </div>
+  <div class="pfoot">
+    <p class="instr" id="p-instr" aria-live="polite"></p>
+    <div class="pcontrols" id="p-controls"></div>
+  </div>
+</div>
+
+<div class="banner" id="banner" hidden role="alert"><p>Es hora de una pausa 20-20-20</p><button class="btn" type="button" id="ban-go">Empezar</button><button class="btn ghost" type="button" id="ban-later">En 5 min</button></div>
+
+<script>
+'use strict';
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const tok=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const nfc={}; const nf=(x,d=1)=>(nfc[d]||(nfc[d]=new Intl.NumberFormat('es-CO',{minimumFractionDigits:d,maximumFractionDigits:d}))).format(x);
+const nft=(x,d=1)=>nf(x,d).replace(',','{,}');
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+function rgba(hex,a){ const n=parseInt(hex.replace('#',''),16); return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`; }
+function mix(h1,h2,u){ const a=parseInt(h1.slice(1),16), b=parseInt(h2.slice(1),16); const c=k=>Math.round(((a>>k)&255)*(1-u)+((b>>k)&255)*u); return `rgb(${c(16)},${c(8)},${c(0)})`; }
+function trapz(x,y){ let s=0; for(let i=0;i<x.length-1;i++) s+=(y[i]+y[i+1])/2*(x[i+1]-x[i]); return s; }
+function typeset(el){ const MJ=window.MathJax; if(MJ&&MJ.typesetPromise){ (MJ.startup&&MJ.startup.promise?MJ.startup.promise:Promise.resolve()).then(()=>MJ.typesetPromise(el?[el]:undefined)).catch(()=>{}); } }
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+
+/* ---------- Sonido ---------- */
+let actx=null, soundOn=true;
+function chime(freq=660,dur=1.4,vol=0.14){ if(!soundOn) return; try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended') actx.resume(); const t=actx.currentTime; const o=actx.createOscillator(), g=actx.createGain(); o.type='sine'; o.frequency.value=freq; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.connect(g).connect(actx.destination); o.start(t); o.stop(t+dur+0.05); const o2=actx.createOscillator(), g2=actx.createGain(); o2.type='sine'; o2.frequency.value=freq*2; g2.gain.setValueAtTime(0,t); g2.gain.linearRampToValueAtTime(vol*0.25,t+0.02); g2.gain.exponentialRampToValueAtTime(0.0001,t+dur*0.6); o2.connect(g2).connect(actx.destination); o2.start(t); o2.stop(t+dur); }catch(e){} }
+
+/* ---------- Iconos ---------- */
+const ICON={
+  lejos:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l6-9 4 6 3-4 5 7Z"/><circle cx="17" cy="6" r="2"/></svg>',
+  seguir:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 12c-2.5-3.5-7-3.5-7 0s4.5 3.5 7 0 7-3.5 7 0-4.5 3.5-7 0Z"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/></svg>',
+  parpadeo:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12c3-4 6-5.5 9-5.5s6 1.5 9 5.5"/><path d="M3 12c3 2.5 6 3.5 9 3.5s6-1 9-3.5"/><path d="M6 17.5l-1 2M12 19v2M18 17.5l1 2"/></svg>',
+  palmeo:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/></svg>',
+  enfoque:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="12" r="2.5"/><circle cx="17" cy="12" r="5"/><path d="M8.5 12h3.5"/></svg>'
+};
+
+/* ---------- Herramientas ---------- */
+const TOOLS={
+  lejos:{name:'Mirar lejos',color:'--amber',dur:20,tag:'20 s',short:'La regla 20-20-20: cada 20 minutos, mira algo a unos 6 metros durante 20 segundos.',
+    steps:['Levanta la vista de la pantalla.','Busca un objeto a unos 6 metros: una ventana, una pared lejana, un árbol.','Míralo con calma hasta que suene la campana.'],
+    concept:'Normalización de una integral',mtitle:'Una barra que arranca y termina suave',
+    mtex:String.raw`p(t)=\frac{\int_0^t \sin\!\left(\frac{\pi\tau}{20}\right)d\tau}{\int_0^{20}\sin\!\left(\frac{\pi\tau}{20}\right)d\tau}`,
+    mdesc:'Dividir entre la integral total garantiza que la barra llegue exactamente a 1 a los 20 segundos.'},
+  seguir:{name:'Seguimiento suave',color:'--sage',dur:40,tag:'40 s',short:'Sigue con los ojos un punto que recorre lentamente una curva, sin mover la cabeza.',
+    steps:['Siéntate derecho y relaja los hombros.','Sigue el punto solo con los ojos, sin mover la cabeza.','Si te mareas, cierra los ojos y detén la pausa.'],
+    concept:'Longitud de arco',mtitle:'Velocidad constante sobre la curva',
+    mtex:String.raw`L=\int_0^{2\pi}\sqrt{x'(\theta)^2+y'(\theta)^2}\,d\theta`,
+    mdesc:'Calculamos la longitud de la curva con la regla del trapecio y avanzamos sobre ella a la misma distancia por segundo.'},
+  parpadeo:{name:'Parpadeo guiado',color:'--lav',dur:40,tag:'40 s',short:'Diez parpadeos completos y lentos para volver a humedecer la superficie del ojo.',
+    steps:['Cuando el ojo de la pantalla se cierre, cierra los tuyos.','Aprieta suavemente los párpados un instante.','Ábrelos despacio cuando el ojo se abra.'],
+    concept:'Valor promedio',mtitle:'¿Cuánto tiempo están abiertos los ojos?',
+    mtex:String.raw`\bar a=\frac{1}{P}\int_0^{P}a(t)\,dt`,
+    mdesc:'La apertura a(t) va de 0 (cerrado) a 1 (abierto). Su valor promedio en un ciclo dice qué fracción del tiempo están abiertos.'},
+  palmeo:{name:'Descanso a oscuras',color:'--rose',dur:60,tag:'60 s',short:'La pantalla se apaga poco a poco y tú descansas con los ojos cubiertos, respirando con el sonido.',
+    steps:['Frota tus manos para calentarlas.','Cierra los ojos y cúbrelos con las palmas, sin presionar.','Respira lento: inhala con el tono agudo y exhala con el grave.'],
+    concept:'Área bajo la curva',mtitle:'¿Cuánta luz dejamos de recibir?',
+    mtex:String.raw`\Lambda=\int_0^{T}b(t)\,dt`,
+    mdesc:'b(t) es el brillo relativo de la pantalla. Con la pantalla encendida, Λ sería igual a T; el desvanecimiento reduce el área bajo la curva.'},
+  enfoque:{name:'Cerca y lejos',color:'--sky',dur:60,tag:'60 s',short:'Alterna la mirada entre la punta de tu dedo y un objeto lejano, siguiendo la campana.',
+    steps:['Pon tu dedo índice a unos 30 cm de la cara.','Con la campana aguda, mira el dedo; con la grave, mira algo a más de 6 metros.','Usa objetos reales: la pantalla no cambia de distancia.'],
+    concept:'Valor promedio de una función por tramos',mtitle:'La demanda de enfoque del ojo',
+    mtex:String.raw`\bar A=\frac{1}{T}\int_0^{T}A(t)\,dt`,
+    mdesc:'Enfocar algo a d metros exige 1/d dioptrías. Frente a la pantalla, el ojo sostiene la misma demanda todo el tiempo; el ejercicio la hace variar.'}
+};
+const ORDER=['lejos','seguir','parpadeo','palmeo','enfoque'];
+
+/* ---------- Inicio ---------- */
+function renderHome(){
+  $('#tools').innerHTML=ORDER.map(id=>{ const t=TOOLS[id]; return `<article class="tool" id="card-${id}" style="--c:var(${t.color})">
+      <div class="ico" aria-hidden="true">${ICON[id]}</div>
+      <h3>${t.name}</h3>
+      <div class="meta"><span>${t.tag}</span><span>·</span><span>${t.concept}</span></div>
+      <p>${t.short}</p>
+      <button class="btn tint go" type="button" data-open="${id}">Empezar</button></article>`; }).join('');
+  $('#math-cards').innerHTML=ORDER.map(id=>{ const t=TOOLS[id]; return `<article class="mcard" style="--c:var(${t.color})"><span class="k">${t.name}</span><h3>${t.concept}</h3><div class="fx">\\[${t.mtex}\\]</div><p>${t.mdesc}</p></article>`; }).join('');
+}
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-open]'); if(b) openTool(b.dataset.open); });
+$$('.chip').forEach(c=>c.addEventListener('click',()=>{
+  $$('.chip').forEach(x=>x.setAttribute('aria-pressed',String(x===c)));
+  const id=c.dataset.sym, t=TOOLS[id];
+  $$('.tool').forEach(card=>{ card.classList.toggle('rec',card.id==='card-'+id); const old=card.querySelector('.badge'); if(old) old.remove(); });
+  const card=$('#card-'+id); card.insertAdjacentHTML('beforeend','<span class="badge">Sugerida</span>');
+  $('#suggest').innerHTML=`Te sugerimos probar <b>${t.name}</b> (${t.tag}). <button class="btn tint" style="--c:var(${t.color});padding:6px 12px;margin-left:6px" type="button" data-open="${id}">Empezar</button>`;
+}));
+
+/* ---------- Contador de pausas del día ---------- */
+function todayKey(){ const d=new Date(); return 'pausa-visual:'+d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+function refreshToday(){ $('#today').textContent=lsGet(todayKey())||'0'; }
+function addToday(){ lsSet(todayKey(),String((+lsGet(todayKey())||0)+1)); refreshToday(); }
+
+/* ---------- Motor de pausas ---------- */
+const R={id:null,t0:0,raf:null,running:false,state:{},W:0,H:0,ctx:null,lastT:0};
+function sizeCanvas(){ const st=$('#p-stage'), cv=$('#p-canvas'); const dpr=window.devicePixelRatio||1; R.W=st.clientWidth; R.H=st.clientHeight; cv.width=Math.round(R.W*dpr); cv.height=Math.round(R.H*dpr); R.ctx=cv.getContext('2d'); R.ctx.setTransform(dpr,0,0,dpr,0,0); }
+function openTool(id){
+  const t=TOOLS[id]; stopRun(); R.id=id; R.state={};
+  const p=$('#pause'); p.style.setProperty('--c',`var(${t.color})`); p.hidden=false; $('#banner').hidden=true;
+  $('#p-name').textContent=t.name; $('#p-time').textContent=fmtTime(t.dur); $('#p-instr').textContent='';
+  $('#p-intro').hidden=false; $('#p-end').hidden=true; $('#p-drawer').hidden=true; $('#p-math').setAttribute('aria-pressed','false');
+  $('#p-intro-card').innerHTML=`<h2>${t.name}</h2><ol>${t.steps.map(s=>`<li>${s}</li>`).join('')}</ol><div class="btns"><button class="btn tint" type="button" id="p-start">Comenzar (${t.tag})</button><button class="btn ghost" type="button" id="p-cancel">Volver</button></div>`;
+  $('#p-start').addEventListener('click',startRun); $('#p-cancel').addEventListener('click',closeTool);
+  renderControls(id);
+  sizeCanvas(); if(SETUP[id]) SETUP[id](R.state); drawIdle();
+  setTimeout(()=>$('#p-start').focus(),50);
+}
+function fmtTime(s){ s=Math.max(0,Math.ceil(s)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+function startRun(){ try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); actx.resume&&actx.resume(); }catch(e){}
+  $('#p-intro').hidden=true; R.t0=performance.now(); R.running=true; R.lastT=0; R.raf=requestAnimationFrame(frame); }
+function frame(now){ if(!R.running) return; const t=(now-R.t0)/1000, T=TOOLS[R.id].dur;
+  const tt=Math.min(t,T); DRAW[R.id](tt,R.state); $('#p-time').textContent=fmtTime(T-tt); R.lastT=tt;
+  if($('#p-drawer').hidden===false) updateLive();
+  if(t>=T){ finishRun(); return; } R.raf=requestAnimationFrame(frame); }
+function stopRun(){ R.running=false; if(R.raf) cancelAnimationFrame(R.raf); R.raf=null; }
+function finishRun(){ stopRun(); chime(523,2.2,0.16); addToday();
+  const t=TOOLS[R.id];
+  $('#p-instr').textContent='';
+  $('#p-end-card').innerHTML=`<h2>Pausa completada</h2><p>${END_MSG[R.id]}</p><div class="btns"><button class="btn tint" type="button" id="p-again">Repetir</button><button class="btn ghost" type="button" id="p-back">Volver al inicio</button></div>`;
+  $('#p-end').hidden=false; $('#p-again').addEventListener('click',()=>openTool(R.id)); $('#p-back').addEventListener('click',closeTool); setTimeout(()=>$('#p-again').focus(),50); }
+function closeTool(){ stopRun(); $('#pause').hidden=true; R.id=null; }
+$('#p-close').addEventListener('click',closeTool);
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!$('#pause').hidden){ e.preventDefault(); closeTool(); } });
+$('#p-sound').addEventListener('click',()=>{ soundOn=!soundOn; $('#p-sound').setAttribute('aria-pressed',String(soundOn)); $('#snd-wave').style.display=soundOn?'':'none'; });
+$('#p-math').addEventListener('click',()=>{ const d=$('#p-drawer'), open=d.hidden; d.hidden=!open; $('#p-math').setAttribute('aria-pressed',String(open)); if(open){ renderDrawer(); } });
+window.addEventListener('resize',()=>{ if(!$('#pause').hidden){ sizeCanvas(); if(SETUP[R.id]) SETUP[R.id](R.state,true); if(!R.running) drawIdle(); } });
+function drawIdle(){ DRAW[R.id](0,R.state,true); }
+const END_MSG={
+  lejos:'Tus ojos descansaron 20 segundos enfocando lejos. Repite cada 20 minutos de pantalla.',
+  seguir:'Retoma tu actividad con calma. Si notaste mareo, prefiere el descanso a oscuras.',
+  parpadeo:'Completaste diez parpadeos lentos. Intenta parpadear completo también mientras lees.',
+  palmeo:'Retira las manos y abre los ojos despacio antes de volver a la pantalla.',
+  enfoque:'Alternaste el enfoque seis veces. Vuelve a la pantalla a una distancia cómoda.'
+};
+
+/* ---------- Controles por herramienta ---------- */
+function renderControls(id){
+  const c=$('#p-controls');
+  if(id==='seguir'){ c.innerHTML=`<label>Curva <select id="c-curve"><option value="inf">Infinito</option><option value="circ">Círculo</option><option value="trebol">Trébol</option></select></label><label>Velocidad <input type="range" id="c-speed" min="60" max="220" step="20" value="120" aria-label="Velocidad en píxeles por segundo"></label><span id="c-speed-out" style="font-variant-numeric:tabular-nums">120 px/s</span>`;
+    $('#c-curve').addEventListener('change',()=>{ SETUP.seguir(R.state,true); if(!R.running) drawIdle(); if(!$('#p-drawer').hidden) renderDrawer(); });
+    $('#c-speed').addEventListener('input',e=>{ const s=R.state; const v=+e.target.value; if(R.running){ s.d0=s.dist(R.lastT); s.tb=R.lastT; } s.v=v; $('#c-speed-out').textContent=v+' px/s'; if(!$('#p-drawer').hidden) renderDrawer(); }); }
+  else c.innerHTML='';
+}
+
+/* ---------- Configuración y dibujo ---------- */
+const SETUP={}, DRAW={};
+function bg(ctx,col='#141118'){ ctx.fillStyle=col; ctx.fillRect(0,0,R.W,R.H); }
+
+/* 1. Mirar lejos */
+DRAW.lejos=(t,s,idle)=>{ const ctx=R.ctx, W=R.W, H=R.H; bg(ctx);
+  const T=20, p=(1-Math.cos(Math.PI*t/T))/2; s.p=p;
+  const cx=W/2, cy=H/2, r=Math.min(W,H)*0.28; const col=tok('--amber');
+  ctx.lineWidth=Math.max(8,r*0.07); ctx.lineCap='round';
+  ctx.strokeStyle='rgba(243,234,223,.10)'; ctx.beginPath(); ctx.arc(cx,cy,r,0,2*Math.PI); ctx.stroke();
+  ctx.strokeStyle=col; ctx.beginPath(); ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+2*Math.PI*p); ctx.stroke();
+  ctx.fillStyle=tok('--ink'); ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.font=`600 ${Math.round(r*0.55)}px Fredoka, sans-serif`; ctx.fillText(String(Math.ceil(T-t)),cx,cy-r*0.06);
+  ctx.fillStyle=tok('--muted'); ctx.font=`700 ${Math.round(Math.max(13,r*0.1))}px Nunito, sans-serif`; ctx.fillText('segundos',cx,cy+r*0.32);
+  if(!idle) $('#p-instr').textContent='Mira algo a unos 6 metros. Vuelve cuando suene la campana.'; };
+
+/* 2. Seguimiento suave: reparametrización por longitud de arco */
+const CURVES={
+  inf:{f:(u,A)=>[A*Math.cos(u),A*Math.sin(u)*Math.cos(u)],span:2*Math.PI,scale:(W,H)=>Math.min(W*0.42,H*0.8),tex:String.raw`x=a\cos\theta,\quad y=a\sin\theta\cos\theta`},
+  circ:{f:(u,A)=>[A*Math.cos(u),A*Math.sin(u)],span:2*Math.PI,scale:(W,H)=>Math.min(W,H)*0.36,tex:String.raw`x=a\cos\theta,\quad y=a\sin\theta`},
+  trebol:{f:(u,A)=>{ const r=A*Math.cos(3*u); return [r*Math.cos(u),r*Math.sin(u)]; },span:Math.PI,scale:(W,H)=>Math.min(W,H)*0.4,tex:String.raw`x=a\cos3\theta\cos\theta,\quad y=a\cos3\theta\sin\theta`}
+};
+SETUP.seguir=(s,keepSpeed)=>{
+  const key=($('#c-curve')&&$('#c-curve').value)||'inf', C=CURVES[key]; const A=C.scale(R.W,R.H);
+  const n=600, th=[], spd=[], pts=[]; const h=1e-4;
+  for(let k=0;k<=n;k++){ const u=C.span*k/n; th.push(u); const p1=C.f(u+h,A), p0=C.f(u-h,A); spd.push(Math.hypot(p1[0]-p0[0],p1[1]-p0[1])/(2*h)); pts.push(C.f(u,A)); }
+  const S=[0]; for(let k=1;k<=n;k++) S.push(S[k-1]+(spd[k-1]+spd[k])/2*(th[k]-th[k-1]));
+  s.key=key; s.C=C; s.A=A; s.th=th; s.S=S; s.pts=pts; s.L=S[n]; s.n=n;
+  if(!keepSpeed||!s.v){ s.v=+(($('#c-speed')&&$('#c-speed').value)||120); }
+  if(s.d0==null){ s.d0=0; s.tb=0; }
+  s.dist=(t)=>s.d0+s.v*(t-s.tb);
+};
+function thetaAt(s,d){ const L=s.L, S=s.S; let x=((d%L)+L)%L; let lo=0, hi=s.n; while(hi-lo>1){ const m=(lo+hi)>>1; if(S[m]<=x) lo=m; else hi=m; } const u=(x-S[lo])/((S[hi]-S[lo])||1); return s.th[lo]+u*(s.th[hi]-s.th[lo]); }
+DRAW.seguir=(t,s,idle)=>{ const ctx=R.ctx, W=R.W, H=R.H; bg(ctx); const cx=W/2, cy=H/2; const col=tok('--sage');
+  ctx.strokeStyle='rgba(243,234,223,.08)'; ctx.lineWidth=2; ctx.beginPath(); s.pts.forEach((p,i)=>i?ctx.lineTo(cx+p[0],cy+p[1]):ctx.moveTo(cx+p[0],cy+p[1])); ctx.closePath(); ctx.stroke();
+  const d=s.dist(t);
+  for(let k=14;k>=1;k--){ const dd=d-k*s.v*0.05; if(dd<0) continue; const p=s.C.f(thetaAt(s,dd),s.A); ctx.fillStyle=rgba(col,0.04*(15-k)/1.5); ctx.beginPath(); ctx.arc(cx+p[0],cy+p[1],10-k*0.4,0,2*Math.PI); ctx.fill(); }
+  const p=s.C.f(thetaAt(s,d),s.A); ctx.save(); ctx.shadowColor=col; ctx.shadowBlur=24; ctx.fillStyle=col; ctx.beginPath(); ctx.arc(cx+p[0],cy+p[1],11,0,2*Math.PI); ctx.fill(); ctx.restore();
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(cx+p[0],cy+p[1],3.5,0,2*Math.PI); ctx.fill();
+  s.laps=d/s.L;
+  if(!idle) $('#p-instr').textContent='Sigue el punto solo con los ojos. La cabeza quieta, los hombros sueltos.'; };
+
+/* 3. Parpadeo guiado: ciclo de 4 s */
+const BLINK={P:4,open:2,close:0.6,shut:0.8};
+function aperture(t){ const B=BLINK, x=((t%B.P)+B.P)%B.P; if(x<B.open) return 1; if(x<B.open+B.close) return (1+Math.cos(Math.PI*(x-B.open)/B.close))/2; if(x<B.open+B.close+B.shut) return 0; return (1-Math.cos(Math.PI*(x-B.open-B.close-B.shut)/B.close))/2; }
+function blinkPhase(t){ const B=BLINK, x=((t%B.P)+B.P)%B.P; if(x<B.open) return 'Mantén los ojos abiertos y relajados'; if(x<B.open+B.close) return 'Cierra los ojos'; if(x<B.open+B.close+B.shut) return 'Aprieta suave'; return 'Ábrelos despacio'; }
+DRAW.parpadeo=(t,s,idle)=>{ const ctx=R.ctx, W=R.W, H=R.H; bg(ctx); const cx=W/2, cy=H/2, w=Math.min(W*0.36,H*0.5), col=tok('--lav');
+  const a=idle?1:aperture(t); const hOpen=w*0.42, hu=hOpen*a, hl=hOpen*0.62*a;
+  ctx.save(); ctx.beginPath(); ctx.moveTo(cx-w,cy); ctx.quadraticCurveTo(cx,cy-2*hu,cx+w,cy); ctx.quadraticCurveTo(cx,cy+2*hl,cx-w,cy); ctx.closePath();
+  ctx.fillStyle='#ece3f6'; ctx.fill(); ctx.clip();
+  const ir=w*0.36; ctx.fillStyle=col; ctx.beginPath(); ctx.arc(cx,cy,ir,0,2*Math.PI); ctx.fill(); ctx.fillStyle='#241d33'; ctx.beginPath(); ctx.arc(cx,cy,ir*0.45,0,2*Math.PI); ctx.fill(); ctx.fillStyle='rgba(255,255,255,.85)'; ctx.beginPath(); ctx.arc(cx-ir*0.25,cy-ir*0.25,ir*0.12,0,2*Math.PI); ctx.fill(); ctx.restore();
+  ctx.strokeStyle=col; ctx.lineWidth=4; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(cx-w,cy); ctx.quadraticCurveTo(cx,cy-2*hu,cx+w,cy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx-w,cy); ctx.quadraticCurveTo(cx,cy+2*hl,cx+w,cy); ctx.stroke();
+  for(let k=-2;k<=2;k++){ const x=cx+k*w*0.28, yTop=cy-hu*(1-Math.pow(k*0.28,2))*1.0; ctx.beginPath(); ctx.moveTo(x,yTop); ctx.lineTo(x+k*6,yTop-12-a*6); ctx.stroke(); }
+  const n=Math.min(10,Math.floor(t/BLINK.P)+1);
+  ctx.fillStyle=tok('--muted'); ctx.font='700 16px Nunito, sans-serif'; ctx.textAlign='center'; ctx.fillText(idle?'10 parpadeos':`Parpadeo ${n} de 10`,cx,cy+w*0.62+24);
+  if(!idle) $('#p-instr').textContent=blinkPhase(t); };
+
+/* 4. Descanso a oscuras */
+const DARK={fade:6,bf:0.05,rise:4};
+function brightness(t,T=60){ const D=DARK; if(t<D.fade) return D.bf+(1-D.bf)*(1+Math.cos(Math.PI*t/D.fade))/2; if(t>T-D.rise) return D.bf+(0.45-D.bf)*(1-Math.cos(Math.PI*(t-(T-D.rise))/D.rise))/2; return D.bf; }
+DRAW.palmeo=(t,s,idle)=>{ const ctx=R.ctx, W=R.W, H=R.H; const b=idle?1:brightness(t); s.b=b;
+  ctx.fillStyle=mix('#060508','#4a4057',b); ctx.fillRect(0,0,W,H);
+  const cx=W/2, cy=H/2, r0=Math.min(W,H)*0.16; const ph=idle?0:Math.sin(2*Math.PI*t/8-Math.PI/2); const r=r0*(1+0.28*(ph+1)/2);
+  const col=tok('--rose'); const g=ctx.createRadialGradient(cx,cy,r*0.2,cx,cy,r*1.4); g.addColorStop(0,rgba(col,0.35*Math.max(b,0.25))); g.addColorStop(1,rgba(col,0));
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,r*1.4,0,2*Math.PI); ctx.fill();
+  if(!idle){ const k=Math.floor(t/4); if(k!==s.k&&t>0.2&&t<59){ s.k=k; chime(k%2===0?587:392,3.2,0.08); }
+    const inh=(Math.floor(t/4)%2===0); $('#p-instr').textContent=t<DARK.fade?'Cierra los ojos y cúbrelos con las palmas':(t>60-DARK.rise?'Retira las manos y abre los ojos despacio':(inh?'Inhala lento…':'Exhala lento…')); } };
+
+/* 5. Cerca y lejos: 6 ciclos de 10 s */
+const FOCUS={near:0.30,far:6,half:5};
+function focusPhase(t){ return Math.floor(t/FOCUS.half)%2===0?'near':'far'; }
+DRAW.enfoque=(t,s,idle)=>{ const ctx=R.ctx, W=R.W, H=R.H; bg(ctx); const cx=W/2, cy=H/2, col=tok('--sky'); const ph=idle?'near':focusPhase(t);
+  const k=Math.floor(t/FOCUS.half); if(!idle&&k!==s.k){ s.k=k; chime(ph==='near'?784:440,1.2,0.12); }
+  const u=idle?0:(t%FOCUS.half)/FOCUS.half; const R0=Math.min(W,H)*0.22;
+  ctx.lineWidth=8; ctx.lineCap='round'; ctx.strokeStyle='rgba(243,234,223,.10)'; ctx.beginPath(); ctx.arc(cx,cy,R0,0,2*Math.PI); ctx.stroke();
+  ctx.strokeStyle=col; ctx.beginPath(); ctx.arc(cx,cy,R0,-Math.PI/2,-Math.PI/2+2*Math.PI*u); ctx.stroke();
+  ctx.fillStyle=tok('--ink'); ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.font=`600 ${Math.round(R0*0.36)}px Fredoka, sans-serif`;
+  ctx.fillText(ph==='near'?'CERCA':'LEJOS',cx,cy-R0*0.08);
+  ctx.fillStyle=tok('--muted'); ctx.font=`700 ${Math.round(Math.max(13,R0*0.11))}px Nunito, sans-serif`; ctx.fillText(ph==='near'?'tu dedo a 30 cm':'algo a más de 6 m',cx,cy+R0*0.3);
+  const cyc=Math.min(6,Math.floor(t/(2*FOCUS.half))+1); ctx.fillText(idle?'6 ciclos':`Ciclo ${cyc} de 6`,cx,cy+R0+34);
+  if(!idle) $('#p-instr').textContent=ph==='near'?'Mira la punta de tu dedo, a unos 30 cm':'Mira un objeto lejano, a más de 6 metros'; };
+
+/* ---------- Matemática en vivo ---------- */
+function renderDrawer(){
+  const id=R.id, t=TOOLS[id], d=$('#p-drawer'); let extra='';
+  if(id==='lejos'){ extra=`<p>Como \\(\\int_0^{20}\\sin\\left(\\frac{\\pi\\tau}{20}\\right)d\\tau=\\frac{40}{\\pi}\\approx ${nft(40/Math.PI,2)}\\), la barra llega a 1 exactamente a los 20 s.</p><div class="fx">\\[p(t)=\\frac{1-\\cos\\left(\\frac{\\pi t}{20}\\right)}{2}\\]</div><p>Avance ahora: \\(p(t)=\\) <span class="live" id="lv-a">—</span></p>`; }
+  if(id==='seguir'){ const s=R.state; extra=`<div class="fx">\\[${s.C.tex}\\]</div><p>Con la regla del trapecio y \\(n=${s.n}\\) subintervalos, la curva en tu pantalla mide <span class="live">L = ${nf(s.L,0)} px</span>.</p>
+      <p>Para que el punto avance a velocidad constante \\(v\\), en cada instante buscamos el \\(\\theta\\) que cumple</p><div class="fx">\\[s(\\theta)=\\int_0^{\\theta}\\sqrt{x'(u)^2+y'(u)^2}\\,du=v\\,t\\]</div>
+      <p>Con \\(v=${s.v}\\) px/s, una vuelta tarda \\(L/v=\\) <span class="live">${nf(s.L/s.v,1)} s</span>. Vueltas recorridas: <span class="live" id="lv-a">—</span></p>`; }
+  if(id==='parpadeo'){ const N=4000, xs=[], ys=[]; for(let k=0;k<=N;k++){ const x=BLINK.P*k/N; xs.push(x); ys.push(aperture(x)); } const abar=trapz(xs,ys)/BLINK.P;
+    extra=`<p>En cada ciclo de \\(P=${BLINK.P}\\) s: ${nf(BLINK.open,0)} s abierto, ${nf(BLINK.close,1)} s cerrando, ${nf(BLINK.shut,1)} s cerrado y ${nf(BLINK.close,1)} s abriendo, con transiciones de tipo coseno.</p><p>Con la regla del trapecio: <span class="live">\\(\\bar a\\) = ${nf(abar,3)}</span>, es decir, los ojos están abiertos en promedio el ${nf(abar*100,0)} % del ciclo. En 40 s hay \\(40/P=10\\) parpadeos.</p><p>Apertura ahora: \\(a(t)=\\) <span class="live" id="lv-a">—</span></p>`; }
+  if(id==='palmeo'){ const T=60, N=6000, xs=[], ys=[]; for(let k=0;k<=N;k++){ const x=T*k/N; xs.push(x); ys.push(brightness(x,T)); } const Lam=trapz(xs,ys);
+    extra=`<div class="fx">\\[b(t)=${String(DARK.bf).replace('.','{,}')}+(1-${String(DARK.bf).replace('.','{,}')})\\,\\frac{1+\\cos\\left(\\frac{\\pi t}{${DARK.fade}}\\right)}{2},\\quad 0\\le t\\le ${DARK.fade}\\]</div><p>Después el brillo se mantiene en ${nf(DARK.bf,2)} y sube suavemente en los últimos ${DARK.rise} s.</p>
+      <p>Con la pantalla encendida, \\(\\Lambda=T=60\\). Con el desvanecimiento, el trapecio da <span class="live">\\(\\Lambda\\) = ${nf(Lam,2)}</span>: recibes un <span class="live">${nf((1-Lam/T)*100,1)} %</span> menos de luz.</p><p>Brillo ahora: \\(b(t)=\\) <span class="live" id="lv-a">—</span></p>`; }
+  if(id==='enfoque'){ const An=1/FOCUS.near, Af=1/FOCUS.far, Am=(An+Af)/2, As=1/0.6;
+    extra=`<div class="fx">\\[A=\\frac{1}{d}\\ \\text{dioptrías}\\]</div><p>con \\(d\\) en metros.</p><p>Cerca (30 cm): \\(A=\\frac{1}{0{,}30}\\approx ${nft(An,2)}\\) D. Lejos (6 m): \\(A=\\frac{1}{6}\\approx ${nft(Af,2)}\\) D.</p><p>Como cada tramo dura lo mismo, \\(\\bar A=\\frac{${nft(An,2)}+${nft(Af,2)}}{2}\\approx\\) <span class="live">${nf(Am,2)} D</span>.</p><p>Frente a una pantalla a 60 cm, el ojo sostiene <span class="live">${nf(As,2)} D</span> sin cambiar. El promedio es parecido; lo que cambia es que el ejercicio alterna el enfoque.</p><p>Demanda ahora: \\(A(t)=\\) <span class="live" id="lv-a">—</span></p>`; }
+  d.style.setProperty('--c',`var(${t.color})`);
+  d.innerHTML=`<h3>${t.mtitle}</h3><p class="small">${t.concept}</p><div class="fx">\\[${t.mtex}\\]</div><p>${t.mdesc}</p>${extra}`;
+  updateLive(); typeset(d);
+}
+function updateLive(){ const el=$('#lv-a'); if(!el) return; const id=R.id, t=R.lastT, s=R.state;
+  if(id==='lejos') el.textContent=nf((1-Math.cos(Math.PI*t/20))/2,3);
+  if(id==='seguir') el.textContent=nf((s.dist?s.dist(t):0)/s.L,2);
+  if(id==='parpadeo') el.textContent=nf(R.running?aperture(t):1,2);
+  if(id==='palmeo') el.textContent=nf(R.running?brightness(t):1,2);
+  if(id==='enfoque') el.textContent=nf(1/(focusPhase(t)==='near'?FOCUS.near:FOCUS.far),2)+' D'; }
+
+/* ---------- Recordatorio ---------- */
+const REM={on:false,next:0,timer:null,flash:null};
+function remTick(){ if(!REM.on) return; const left=(REM.next-Date.now())/1000; $('#clock').textContent=fmtTime(left);
+  if(left<=0){ REM.on=false; clearInterval(REM.timer); chime(523,2.2,0.16); $('#banner').hidden=false; startFlash(); $('#clock').textContent='00:00'; $('#rem-btn').textContent='Activar'; } }
+function startRem(min){ REM.on=true; REM.next=Date.now()+min*60000; clearInterval(REM.timer); REM.timer=setInterval(remTick,1000); remTick(); $('#clock').classList.remove('off'); $('#rem-btn').textContent='Detener'; }
+function stopRem(){ REM.on=false; clearInterval(REM.timer); $('#clock').textContent='--:--'; $('#clock').classList.add('off'); $('#rem-btn').textContent='Activar'; }
+function startFlash(){ const base='Pausa Visual'; let k=0; clearInterval(REM.flash); REM.flash=setInterval(()=>{ document.title=(k++%2)?base:'Hora de tu pausa'; },1000); }
+function stopFlash(){ clearInterval(REM.flash); document.title='Pausa Visual'; }
+$('#rem-btn').addEventListener('click',()=>{ try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); actx.resume&&actx.resume(); }catch(e){} if(REM.on) stopRem(); else startRem(+$('#rem-min').value); });
+$('#ban-go').addEventListener('click',()=>{ stopFlash(); $('#banner').hidden=true; openTool('lejos'); startRem(+$('#rem-min').value); });
+$('#ban-later').addEventListener('click',()=>{ stopFlash(); $('#banner').hidden=true; startRem(5); });
+
+/* ---------- Inicio ---------- */
+renderHome(); refreshToday();
+</script>
+</body>
+</html>
